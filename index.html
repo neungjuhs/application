@@ -7,6 +7,8 @@
     <!-- html2canvas & jsPDF 라이브러리 (PDF 변환용) -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- 카카오/다음 도로명 주소검색 API -->
+    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
     <style>
         * { box-sizing: border-box; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
         body { background-color: #f4f6f9; margin: 0; padding: 30px 15px; }
@@ -36,6 +38,9 @@
         .btn-del { background-color: #ef4444; color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; }
         .btn-del:hover { background-color: #dc2626; }
 
+        .btn-search-addr { background-color: #3b82f6; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
+        .btn-search-addr:hover { background-color: #2563eb; }
+
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .btn-preview { width: 100%; background-color: #0d9488; color: white; border: none; padding: 16px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
         .btn-preview:hover { background-color: #0f766e; }
@@ -49,13 +54,10 @@
         .pdf-page { 
             width: 210mm; 
             height: 297mm; 
-            padding: 20mm; 
+            padding: 15mm 20mm; 
             background: #fff; 
-            color: #000; 
-            box-sizing: border-box; 
             position: relative; 
-            display: flex; 
-            flex-direction: column; 
+            box-sizing: border-box; 
             overflow: hidden; 
         }
         
@@ -77,19 +79,22 @@
         .footer-declaration { text-align: center; font-size: 11px; margin-top: 15px; line-height: 1.8; }
         .footer-signature { text-align: center; font-size: 16px; font-weight: bold; margin-top: 20px; }
 
-        /* 자기소개서 PDF 전용 레이아웃 스타일 (A4 1장에 맞추기 위해 조절됨) */
-        .pdf-cover-container { display: flex; flex-direction: column; flex-grow: 1; }
-        .pdf-cover-item { margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px dashed #cbd5e1; }
-        .pdf-cover-item:last-child { margin-bottom: 0; padding-bottom: 0; border-bottom: none; }
-        .pdf-cover-title { font-weight: bold; margin-bottom: 4px; color: #000; font-size: 10.5pt; }
+        /* 자기소개서 PDF 전용 레이아웃 스타일 (텍스트상자 적용) */
+        .pdf-cover-container { display: flex; flex-direction: column; flex-grow: 1; gap: 12px; }
+        .pdf-cover-item { margin-bottom: 8px; }        
+        .pdf-cover-title { font-weight: bold; margin-bottom: 3px; color: #000; font-size: 10pt; }        
         .pdf-cover-content { 
-            font-family: 'HYSinMyeongJo-Medium', 'HY신명조', 'HYSinMyeongJo', '신명조', 'ShinMyeongJo', serif; 
-            font-size: 10pt; 
-            line-height: 1.45; 
+            font-family: 'HYSinMyeongJo-Medium', 'HY신명조', 'HYSinMyeongJo', '신명조', serif; 
+            font-size: 9.5pt; 
+            line-height: 1.35; 
             text-align: justify; 
             white-space: pre-wrap; 
             word-break: break-all; 
             color: #000; 
+            border: 1px solid #000; 
+            padding: 6px 8px; 
+            min-height: 95px; 
+            box-sizing: border-box;
         }
     </style>
 </head>
@@ -171,9 +176,19 @@
                     </div>
                 </td>
             </tr>
+            <!-- 도로명 주소 입력 (수정된 부분) -->
             <tr>
                 <th>현주소 *</th>
-                <td colspan="5"><input type="text" id="address" name="address" required placeholder="도로명 주소 입력"></td>
+                <td colspan="5" style="text-align: left;">
+                    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+                        <input type="text" id="postcode" placeholder="우편번호" required readonly style="width: 120px; background-color: #f8fafc;">
+                        <button type="button" class="btn-search-addr" onclick="execDaumPostcode()">주소 검색</button>
+                    </div>
+                    <div style="display: flex; gap: 8px; flex-direction: column;">
+                        <input type="text" id="address_main" placeholder="주소 검색 버튼을 클릭하여 입력하세요." required readonly style="background-color: #f8fafc;">
+                        <input type="text" id="address_detail" placeholder="상세주소를 입력해주세요 (예: 101동 202호)" required>
+                    </div>
+                </td>
             </tr>
             <tr>
                 <th>E-mail *</th>
@@ -207,16 +222,16 @@
             <tbody id="teacherLicTbody">
                 <tr>
                     <td>
-                        <select class="lic-grade">
+                        <select class="lic-grade" required>
                             <option value="정교사(2급)" selected>정교사(2급)</option>
                             <option value="정교사(1급)">정교사(1급)</option>
                             <option value="준교사">준교사</option>
                         </select>
                     </td>
-                    <td><input type="text" class="lic-subject" placeholder="예: 국어, 영어 등"></td>
-                    <td><input type="text" class="lic-org"></td>
+                    <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
+                    <td><input type="text" class="lic-org" required></td>
                     <td>
-                        <select class="lic-type">
+                        <select class="lic-type" required>
                             <option value="주전공" selected>주전공</option>
                             <option value="복수전공">복수전공</option>
                             <option value="부전공">부전공</option>
@@ -224,9 +239,9 @@
                     </td>
                     <td>
                         <div class="period-select-group">
-                            <select class="lic-year"></select>
-                            <select class="lic-month"></select>
-                            <select class="lic-day"></select>
+                            <select class="lic-year" required></select>
+                            <select class="lic-month" required></select>
+                            <select class="lic-day" required></select>
                         </div>
                     </td>
                     <td>-</td>
@@ -372,9 +387,20 @@
 <div id="pdf-render-area">
     <!-- 1페이지: 입사지원서 -->
     <div id="page-application" class="pdf-page">
-        <div class="paper-title">학교법인 우정학원 능주고등학교 교사 채용 응시원서 및 자기소개서</div>
+        
+        <!-- 타이틀 및 접수번호 영역 -->
+        <div style="position: relative; margin-bottom: 10px;">
+            <div class="paper-title" style="margin: 0; padding-top: 10px; padding-bottom: 10px; font-size: 19px; line-height: 1.4;">
+                학교법인 우정학원 능주고등학교 교사 채용<br>응시원서 및 자기소개서
+            </div>
+            
+            <div style="position: absolute; bottom: 0; left: 0; width: 110px; border: 1px solid #000; text-align: center;">
+                <div style="background-color: #f2f2f2; border-bottom: 1px solid #000; padding: 4px 0; font-size: 11px; font-weight: bold;">접수번호</div>
+                <div style="height: 30px; line-height: 30px; color: #666; font-size: 10px;">(지원자 미기재)</div>
+            </div>
+        </div>
 
-        <div class="sub-title">1. 기본 인적사항</div>
+        <div class="sub-title" style="margin-top: 5px;">1. 기본 인적사항</div>
         <table class="sheet-table">
             <tr>
                 <th style="width: 15%;">지원과목</th>
@@ -479,6 +505,30 @@
 <script>
     let uploadedPhotoData = null;
 
+    // 카카오/다음 도로명 주소 검색 함수
+    function execDaumPostcode() {
+        new daum.Postcode({
+            oncomplete: function(data) {
+                let fullAddr = data.roadAddress || data.jibunAddress;
+                let extraAddr = '';
+
+                if(data.bname !== '' && /[동|리]$/g.test(data.bname)){
+                    extraAddr += data.bname;
+                }
+                if(data.buildingName !== '' && data.selectType === 'R'){
+                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
+                }
+                if(extraAddr !== ''){
+                    fullAddr += ' (' + extraAddr + ')';
+                }
+
+                document.getElementById('postcode').value = data.zonecode;
+                document.getElementById('address_main').value = fullAddr;
+                document.getElementById('address_detail').focus();
+            }
+        }).open();
+    }
+
     function updateItemCharCount(obj, countId, max) {
         const length = obj.value.length;
         document.getElementById(countId).innerText = length.toLocaleString();
@@ -539,16 +589,16 @@
         newRow.innerHTML = `
             <td>
                 <div class="period-select-group">
-                    <select class="edu-start-year">${yOpt}</select>
-                    <select class="edu-start-month">${mOpt}</select>
+                    <select class="edu-start-year" required>${yOpt}</select>
+                    <select class="edu-start-month" required>${mOpt}</select>
                     <span>~</span>
-                    <select class="edu-end-year">${yOpt}</select>
-                    <select class="edu-end-month">${mOpt}</select>
+                    <select class="edu-end-year" required>${yOpt}</select>
+                    <select class="edu-end-month" required>${mOpt}</select>
                 </div>
             </td>
-            <td><input type="text" class="edu-school" placeholder="${placeholderText}"></td>
-            <td><input type="text" class="edu-major" placeholder="○○학과"></td>
-            <td><input type="text" class="edu-note" placeholder="졸업/수료 등"></td>
+            <td><input type="text" class="edu-school" required placeholder="${placeholderText}"></td>
+            <td><input type="text" class="edu-major" required placeholder="○○학과"></td>
+            <td><input type="text" class="edu-note" required placeholder="졸업/수료 등"></td>
             <td>${deleteBtn}</td>
         `;
         tbody.appendChild(newRow);
@@ -559,16 +609,16 @@
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td>
-                <select class="lic-grade">
+                <select class="lic-grade" required>
                     <option value="정교사(2급)" selected>정교사(2급)</option>
                     <option value="정교사(1급)">정교사(1급)</option>
                     <option value="준교사">준교사</option>
                 </select>
             </td>
-            <td><input type="text" class="lic-subject" placeholder="예: 국어, 영어 등"></td>
-            <td><input type="text" class="lic-org"></td>
-            <td><select class="lic-type"><option value="주전공">주전공</option><option value="복수전공">복수전공</option><option value="부전공" selected>부전공</option></select></td>
-            <td><div class="period-select-group"><select class="lic-year">${generateYearOptions(1980)}</select><select class="lic-month">${generateMonthOptions()}</select><select class="lic-day">${generateDayOptions()}</select></div></td>
+            <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
+            <td><input type="text" class="lic-org" required></td>
+            <td><select class="lic-type" required><option value="주전공">주전공</option><option value="복수전공">복수전공</option><option value="부전공" selected>부전공</option></select></td>
+            <td><div class="period-select-group"><select class="lic-year" required>${generateYearOptions(1980)}</select><select class="lic-month">${generateMonthOptions()}</select><select class="lic-day">${generateDayOptions()}</select></div></td>
             <td><button type="button" class="btn-del" onclick="removeRow(this)">삭제</button></td>
         `;
         tbody.appendChild(newRow);
@@ -581,9 +631,9 @@
         const deleteBtn = isFirst ? '-' : `<button type="button" class="btn-del" onclick="removeRow(this, true)">삭제</button>`;
 
         newRow.innerHTML = `
-            <td><div class="period-select-group"><select class="start-year" onchange="calculateRowPeriod(this)">${yOpt}</select><select class="start-month" onchange="calculateRowPeriod(this)">${mOpt}</select><span>~</span><select class="end-year" onchange="calculateRowPeriod(this)">${yOpt}</select><select class="end-month" onchange="calculateRowPeriod(this)">${mOpt}</select></div></td>
+            <td><div class="period-select-group"><select class="start-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="start-month" required onchange="calculateRowPeriod(this)">${mOpt}</select><span>~</span><select class="end-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="end-month" required onchange="calculateRowPeriod(this)">${mOpt}</select></div></td>
             <td>
-                <select class="exp-pos">
+                <select class="exp-pos" required>
                     <option value="">선택</option>
                     <option value="정교사">정교사</option>
                     <option value="기간제교사">기간제교사</option>
@@ -591,7 +641,7 @@
                     <option value="기타">기타</option>
                 </select>
             </td>
-            <td><input type="text" class="exp-org"></td>
+            <td><input type="text" class="exp-org" required></td>
             <td><input type="text" class="exp-months" placeholder="자동 계산" readonly style="background-color: #f8fafc; text-align: center;"></td>
             <td>${deleteBtn}</td>
         `;
@@ -661,7 +711,17 @@
         const p1 = document.getElementById('phone_prefix').value, p2 = document.getElementById('phone_mid').value, p3 = document.getElementById('phone_end').value;
         document.getElementById('doc_phone').innerText = (p2 && p3) ? `${p1}-${p2}-${p3}` : '-';
 
-        document.getElementById('doc_address').innerText = document.getElementById('address').value || '-';
+        // 주소 결합 처리 (우편번호 + 기본주소 + 상세주소)
+        const postcode = document.getElementById('postcode').value;
+        const mainAddr = document.getElementById('address_main').value;
+        const detailAddr = document.getElementById('address_detail').value;
+        
+        if (mainAddr) {
+            document.getElementById('doc_address').innerText = `(${postcode}) ${mainAddr} ${detailAddr}`.trim();
+        } else {
+            document.getElementById('doc_address').innerText = '-';
+        }
+
         document.getElementById('doc_email').innerText = document.getElementById('user_email').value || '-';
 
         const docPhoto = document.getElementById('doc_photo'), docPhotoPh = document.getElementById('doc_photo_ph');
@@ -736,9 +796,8 @@
         generateCoverLetterPages();
     }
 
- /* 자기소개서 항목 간 줄간격 및 여백 조정 생성 함수 */
+    /* 자기소개서 각 항목 박스(텍스트상자) 형태 생성 함수 */
     function generateCoverLetterPages() {
-        // 입력된 지원과목과 성명 가져오기
         const applySubject = document.getElementById('apply_subject').value || '-';
         const userName = document.getElementById('user_name').value || '-';
 
@@ -755,45 +814,29 @@
         const pageDiv = document.createElement('div');
         pageDiv.className = 'pdf-page';
         
-        // 자기소개서 제목
-        let htmlContent = `<div class="paper-title" style="margin-bottom: 15px; font-size: 18px;">자 기 소 개 서</div>`;
-        
-        // 지원과목 및 성명 우측 정렬 추가
-        htmlContent += `<div style="text-align: right; margin-bottom: 15px; font-size: 11pt; font-weight: bold; color: #000;">지원과목 : ${applySubject} &nbsp;&nbsp;&nbsp; 성명 : ${userName}</div>`;
-
+        let htmlContent = `<div class="paper-title" style="margin-bottom: 8px; font-size: 16px;">자 기 소 개 서</div>`;
+        htmlContent += `<div style="text-align: right; margin-bottom: 10px; font-size: 10pt; font-weight: bold; color: #000;">지원과목 : ${applySubject} &nbsp;&nbsp;&nbsp; 성명 : ${userName}</div>`;
         htmlContent += `<div class="pdf-cover-container">`;
         
         items.forEach(item => {
             htmlContent += `<div class="pdf-cover-item">`;
-            htmlContent += `<div class="pdf-cover-title">[ ${item.title} ]</div>`;
+            htmlContent += `<div class="pdf-cover-title">${item.title}</div>`;
             htmlContent += `<div class="pdf-cover-content">${item.text || '내용이 입력되지 않았습니다.'}</div>`;
             htmlContent += `</div>`;
         });
         
         htmlContent += `</div>`;
-        
         pageDiv.innerHTML = htmlContent;
         container.appendChild(pageDiv);
     }
 
     async function downloadPDF() {
-        const by = document.getElementById('birth_year').value, bm = document.getElementById('birth_month').value, bd = document.getElementById('birth_day').value;
-        if (!by || !bm || !bd) { alert('생년월일을 올바르게 선택해 주세요.'); return; }
-        
-        const p2 = document.getElementById('phone_mid').value.trim(), p3 = document.getElementById('phone_end').value.trim();
-        if (!p2 || !p3) { alert('휴대폰 번호를 올바르게 입력해 주세요.'); return; }
-
-        const userName = document.getElementById('user_name').value.trim();
-        if (!userName) { alert('성명을 입력해 주세요.'); document.getElementById('user_name').focus(); return; }
+        const form = document.getElementById('applyForm');
+        if (!form.reportValidity()) {
+            return; 
+        }
 
         if (!uploadedPhotoData) { alert('사진을 첨부해 주세요.'); return; }
-
-        /* 동의 항목 필수 선택 검증 */
-        const agreeCheck = document.querySelector('input[name="agree_check"]:checked');
-        if (!agreeCheck) { alert('채용제한자 해당여부 조회 동의 항목을 선택해 주세요.'); return; }
-
-        const agreePrivacy = document.querySelector('input[name="agree_privacy"]:checked');
-        if (!agreePrivacy) { alert('개인정보 수집·이용 동의 항목을 선택해 주세요.'); return; }
 
         populatePaperTemplate();
         
@@ -814,6 +857,8 @@
                 pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
             }
             
+            const userName = document.getElementById('user_name').value.trim() || '지원자';
+
             pdf.save(`응시원서_자기소개서_${userName}.pdf`);
             alert('PDF가 저장되었습니다. njhs1139@korea.kr로 이 파일을 첨부하여 보내주세요.');
         } catch (error) {
