@@ -41,6 +41,9 @@
         .btn-search-addr { background-color: #3b82f6; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
         .btn-search-addr:hover { background-color: #2563eb; }
 
+        .btn-clear-sig { background-color: #64748b; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+        .btn-clear-sig:hover { background-color: #475569; }
+
         .btn-group { display: flex; gap: 10px; margin-top: 20px; }
         .btn-preview { width: 100%; background-color: #0d9488; color: white; border: none; padding: 16px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
         .btn-preview:hover { background-color: #0f766e; }
@@ -48,7 +51,11 @@
 
         .no-exp-label { font-size: 13px; font-weight: bold; color: #0f766e; cursor: pointer; display: flex; align-items: center; gap: 4px; }
 
-        /* PDF 렌더링용 숨김 영역 (A4 단위 독립 페이지 구조) */
+        /* 서명 패드 스타일 */
+        .signature-container { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; display: inline-block; position: relative; touch-action: none; }
+        #sig-canvas { cursor: crosshair; display: block; border-radius: 4px; }
+
+        /* PDF 렌더링용 숨김 영역 */
         #pdf-render-area { position: absolute; left: -9999px; top: -9999px; width: 210mm; background: #fff; }
         
         .pdf-page { 
@@ -76,10 +83,13 @@
         .pdf-agree-title { font-weight: bold; margin-bottom: 2px; }
         .pdf-agree-check { text-align: right; font-weight: bold; margin-top: 2px; }
 
-        .footer-declaration { text-align: center; font-size: 11px; margin-top: 15px; line-height: 1.8; }
+        .footer-declaration { text-align: center; font-size: 11px; margin-top: 15px; line-height: 1.8; position: relative; }
         .footer-signature { text-align: center; font-size: 16px; font-weight: bold; margin-top: 20px; }
 
-        /* 자기소개서 PDF 전용 레이아웃 스타일 (텍스트상자 적용) */
+        /* PDF 서명 이미지 출력 스타일 */
+        .pdf-signature-img { position: absolute; right: 190px; bottom: -5px; height: 32px; width: auto; object-fit: contain; }
+
+        /* 자기소개서 PDF 전용 레이아웃 스타일 */
         .pdf-cover-container { display: flex; flex-direction: column; flex-grow: 1; gap: 12px; }
         .pdf-cover-item { margin-bottom: 8px; }        
         .pdf-cover-title { font-weight: bold; margin-bottom: 3px; color: #000; font-size: 10pt; }        
@@ -176,7 +186,6 @@
                     </div>
                 </td>
             </tr>
-            <!-- 도로명 주소 입력 (수정된 부분) -->
             <tr>
                 <th>현주소 *</th>
                 <td colspan="5" style="text-align: left;">
@@ -305,7 +314,6 @@
             <h2 class="section-title">5. 자기소개서 (항목별 500자 이내)</h2>
         </div>
         
-        <!-- 항목 1 -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">1. 자신의 장·단점</label>
             <textarea id="cover_1" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
@@ -316,7 +324,6 @@
             </div>
         </div>
 
-        <!-- 항목 2 -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">2. 학생 인성지도계획</label>
             <textarea id="cover_2" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
@@ -327,7 +334,6 @@
             </div>
         </div>
 
-        <!-- 항목 3 -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">3. 교과학습 지도계획</label>
             <textarea id="cover_3" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
@@ -338,7 +344,6 @@
             </div>
         </div>
 
-        <!-- 항목 4 -->
         <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">4. 본인의 교직관</label>
             <textarea id="cover_4" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
@@ -372,6 +377,18 @@
             </div>
         </div>
 
+        <!-- 서명 입력 패드 영역 추가 -->
+        <div class="section-header">
+            <h2 class="section-title">7. 지원자 서명 *</h2>
+            <button type="button" class="btn-clear-sig" onclick="clearSignature()">서명 다시하기</button>
+        </div>
+        <div style="text-align: center; margin-bottom: 15px;">
+            <div class="signature-container">
+                <canvas id="sig-canvas" width="350" height="120"></canvas>
+            </div>
+            <p style="font-size: 11px; color: #64748b; margin-top: 4px;">* 마우스 또는 태블릿/모바일 터치를 이용해 박스 안에 서명해 주세요.</p>
+        </div>
+
         <p style="text-align: center; font-weight: bold; margin-top: 35px; color: #000; font-size: 18px;">
             학교법인 우정학원 능주고등학교장 귀하
         </p>
@@ -388,7 +405,6 @@
     <!-- 1페이지: 입사지원서 -->
     <div id="page-application" class="pdf-page">
         
-        <!-- 타이틀 및 접수번호 영역 -->
         <div style="position: relative; margin-bottom: 10px;">
             <div class="paper-title" style="margin: 0; padding-top: 10px; padding-bottom: 10px; font-size: 19px; line-height: 1.4;">
                 학교법인 우정학원 능주고등학교 교사 채용<br>응시원서 및 자기소개서
@@ -470,7 +486,6 @@
             <tbody id="doc_exp_body"></tbody>
         </table>
 
-        <!-- 항목별 동의 체크박스 상태 출력 영역 -->
         <div class="pdf-agree-section">
             <div class="pdf-agree-item">
                 <div class="pdf-agree-title">1. 응모불가 대상인 채용제한자에 해당여부 조회 동의</div>
@@ -488,9 +503,11 @@
             </div>
         </div>
 
+        <!-- 하단 지원자 서명 영역 -->
         <div class="footer-declaration">
             <span id="doc_today_date"></span><br>
             지원자 : <span id="doc_sign_name" style="font-weight: bold;">-</span> (서명/인)
+            <img id="doc_signature_img" class="pdf-signature-img" src="" alt="서명" style="display:none;">
         </div>
 
         <div class="footer-signature">
@@ -498,14 +515,14 @@
         </div>
     </div>
     
-    <!-- 자기소개서 2페이지 컨테이너 -->
     <div id="cover-letter-pages-container"></div>
 </div>
 
 <script>
     let uploadedPhotoData = null;
+    let canvas, ctx, isDrawing = false, hasSigned = false;
 
-    // 카카오/다음 도로명 주소 검색 함수
+    // 카카오/다음 도로명 주소 검색
     function execDaumPostcode() {
         new daum.Postcode({
             oncomplete: function(data) {
@@ -529,9 +546,60 @@
         }).open();
     }
 
+    // 캔버스 수기 서명 로직
+    function initSignatureCanvas() {
+        canvas = document.getElementById('sig-canvas');
+        ctx = canvas.getContext('2d');
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+
+        function getPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            let clientX = e.clientX, clientY = e.clientY;
+            if (e.touches && e.touches.length > 0) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+            }
+            return { x: clientX - rect.left, y: clientY - rect.top };
+        }
+
+        function startDraw(e) {
+            isDrawing = true;
+            hasSigned = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            if (e.type === 'touchstart') e.preventDefault();
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.stroke();
+            if (e.type === 'touchmove') e.preventDefault();
+        }
+
+        function stopDraw() { isDrawing = false; }
+
+        canvas.addEventListener('mousedown', startDraw);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDraw);
+        canvas.addEventListener('mouseleave', stopDraw);
+
+        canvas.addEventListener('touchstart', startDraw, { passive: false });
+        canvas.addEventListener('touchmove', draw, { passive: false });
+        canvas.addEventListener('touchend', stopDraw);
+    }
+
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+    }
+
     function updateItemCharCount(obj, countId, max) {
-        const length = obj.value.length;
-        document.getElementById(countId).innerText = length.toLocaleString();
+        document.getElementById(countId).innerText = obj.value.length.toLocaleString();
     }
 
     function previewUserPhoto(input) {
@@ -711,7 +779,6 @@
         const p1 = document.getElementById('phone_prefix').value, p2 = document.getElementById('phone_mid').value, p3 = document.getElementById('phone_end').value;
         document.getElementById('doc_phone').innerText = (p2 && p3) ? `${p1}-${p2}-${p3}` : '-';
 
-        // 주소 결합 처리 (우편번호 + 기본주소 + 상세주소)
         const postcode = document.getElementById('postcode').value;
         const mainAddr = document.getElementById('address_main').value;
         const detailAddr = document.getElementById('address_detail').value;
@@ -727,6 +794,15 @@
         const docPhoto = document.getElementById('doc_photo'), docPhotoPh = document.getElementById('doc_photo_ph');
         if (uploadedPhotoData) { docPhoto.src = uploadedPhotoData; docPhoto.style.display = 'block'; docPhotoPh.style.display = 'none'; } 
         else { docPhoto.style.display = 'none'; docPhotoPh.style.display = 'block'; }
+
+        // 수기 서명 이미지를 PDF 양식 하단에 넣기
+        const sigImgElem = document.getElementById('doc_signature_img');
+        if (hasSigned) {
+            sigImgElem.src = canvas.toDataURL('image/png');
+            sigImgElem.style.display = 'inline-block';
+        } else {
+            sigImgElem.style.display = 'none';
+        }
 
         const t = new Date();
         document.getElementById('doc_today_date').innerText = `${t.getFullYear()}년 ${(t.getMonth() + 1).toString().padStart(2, '0')}월 ${t.getDate().toString().padStart(2, '0')}일`;
@@ -774,7 +850,6 @@
             else expTbody.innerHTML += `<tr><th colspan="3">총 교원 경력</th><td><b>${document.getElementById('total_exp').value || '0개월'}</b></td></tr>`;
         }
 
-        /* 동의 항목 라디오버튼 체크 여부 반영 */
         const agreeCheck = document.querySelector('input[name="agree_check"]:checked');
         if (agreeCheck && agreeCheck.value === '동의함') {
             document.getElementById('doc_agree_check_yes').innerText = '☑';
@@ -796,7 +871,6 @@
         generateCoverLetterPages();
     }
 
-    /* 자기소개서 각 항목 박스(텍스트상자) 형태 생성 함수 */
     function generateCoverLetterPages() {
         const applySubject = document.getElementById('apply_subject').value || '-';
         const userName = document.getElementById('user_name').value || '-';
@@ -837,6 +911,7 @@
         }
 
         if (!uploadedPhotoData) { alert('사진을 첨부해 주세요.'); return; }
+        if (!hasSigned) { alert('지원자 서명 패드에 서명을 해주세요.'); return; }
 
         populatePaperTemplate();
         
@@ -852,8 +927,8 @@
 
             for (let i = 0; i < pages.length; i++) {
                 if (i > 0) pdf.addPage();
-                const canvas = await html2canvas(pages[i], { scale: 2, useCORS: true });
-                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+                const canvasRender = await html2canvas(pages[i], { scale: 2, useCORS: true });
+                const imgData = canvasRender.toDataURL('image/jpeg', 1.0);
                 pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
             }
             
@@ -873,6 +948,7 @@
     window.onload = function() {
         initBirthdateSelects(); 
         initTeacherLicSelects(); 
+        initSignatureCanvas();
         
         addEducationRow("○○대학교", true);  
         addEducationRow("○○대학원", false); 
