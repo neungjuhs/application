@@ -932,9 +932,11 @@
                 pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
             }
             
-            const userName = document.getElementById('user_name').value.trim() || '지원자';
+            // 지원과목 및 성명을 반영한 파일명 설정
+            const applySubject = document.getElementById('apply_subject').value.trim() || '과목';
+            const userName = document.getElementById('user_name').value.trim() || '성명';
 
-            pdf.save(`응시원서_자기소개서_${userName}.pdf`);
+            pdf.save(`능주고등학교 응시원서 및 자기소개서_${applySubject}_${userName}.pdf`);
             alert('PDF가 저장되었습니다. njhs1139@korea.kr로 이 파일을 첨부하여 보내주세요.');
         } catch (error) {
             console.error('오류 발생:', error);
