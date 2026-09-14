@@ -486,35 +486,38 @@
             <tbody id="doc_exp_body"></tbody>
         </table>
 
-        <div class="pdf-agree-section">
-            <div class="pdf-agree-item">
-                <div class="pdf-agree-title">1. 응모불가 대상인 채용제한자에 해당여부 조회 동의</div>
-                <div>위 기재 사항은 사실과 틀림없으며, 채용 공고의 지원 자격 및 제한 사유를 확인하였고 허위 내용이 있을 경우 계약 해지 사유가 될 수 있음을 확인합니다.</div>
-                <div class="pdf-agree-check">
-                    [ <span id="doc_agree_check_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_check_no">☐</span> 동의하지 않음 ]
+        <div id="page1-bottom-section">
+            <div class="pdf-agree-section">
+                <div class="pdf-agree-item">
+                    <div class="pdf-agree-title">1. 응모불가 대상인 채용제한자에 해당여부 조회 동의</div>
+                    <div>위 기재 사항은 사실과 틀림없으며, 채용 공고의 지원 자격 및 제한 사유를 확인하였고 허위 내용이 있을 경우 계약 해지 사유가 될 수 있음을 확인합니다.</div>
+                    <div class="pdf-agree-check">
+                        [ <span id="doc_agree_check_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_check_no">☐</span> 동의하지 않음 ]
+                    </div>
+                </div>
+                <div class="pdf-agree-item" style="border-top: 1px dashed #ccc; padding-top: 4px; margin-top: 4px;">
+                    <div class="pdf-agree-title">2. 개인정보 수집·이용 동의</div>
+                    <div>개인정보보호법 제15조 1항에 따라 계약제교원 채용을 위한 본인의 개인정보 제공에 동의합니다.</div>
+                    <div class="pdf-agree-check">
+                        [ <span id="doc_agree_privacy_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_privacy_no">☐</span> 동의하지 않음 ]
+                    </div>
                 </div>
             </div>
-            <div class="pdf-agree-item" style="border-top: 1px dashed #ccc; padding-top: 4px; margin-top: 4px;">
-                <div class="pdf-agree-title">2. 개인정보 수집·이용 동의</div>
-                <div>개인정보보호법 제15조 1항에 따라 계약제교원 채용을 위한 본인의 개인정보 제공에 동의합니다.</div>
-                <div class="pdf-agree-check">
-                    [ <span id="doc_agree_privacy_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_privacy_no">☐</span> 동의하지 않음 ]
-                </div>
+
+            <!-- 하단 지원자 서명 영역 -->
+            <div class="footer-declaration">
+                <span id="doc_today_date"></span><br>
+                지원자 : <span id="doc_sign_name" style="font-weight: bold;">-</span> (서명/인)
+                <img id="doc_signature_img" class="pdf-signature-img" src="" alt="서명" style="display:none;">
             </div>
-        </div>
 
-        <!-- 하단 지원자 서명 영역 -->
-        <div class="footer-declaration">
-            <span id="doc_today_date"></span><br>
-            지원자 : <span id="doc_sign_name" style="font-weight: bold;">-</span> (서명/인)
-            <img id="doc_signature_img" class="pdf-signature-img" src="" alt="서명" style="display:none;">
-        </div>
-
-        <div class="footer-signature">
-            학교법인 우정학원 능주고등학교장 귀하
+            <div class="footer-signature">
+                학교법인 우정학원 능주고등학교장 귀하
+            </div>
         </div>
     </div>
     
+    <div id="extra-exp-page-container"></div>
     <div id="cover-letter-pages-container"></div>
 </div>
 
@@ -833,21 +836,51 @@
         if (eduCount === 0) eduTbody.innerHTML = `<tr><td>-</td><td>-</td><td>-</td><td>-</td></tr>`;
 
         const expTbody = document.getElementById('doc_exp_body'); expTbody.innerHTML = '';
-        if (document.getElementById('noExpCheckbox').checked) {
-            expTbody.innerHTML = `<tr><td colspan="3">경력 없음 (신규)</td><td>-</td></tr>`;
-        } else {
-            let expCount = 0;
+        const extraExpContainer = document.getElementById('extra-exp-page-container');
+        extraExpContainer.innerHTML = '';
+
+        let expList = [];
+        if (!document.getElementById('noExpCheckbox').checked) {
             document.querySelectorAll('#expTbody tr').forEach(row => {
                 const sY = row.querySelector('.start-year').value, sM = row.querySelector('.start-month').value;
                 const eY = row.querySelector('.end-year').value, eM = row.querySelector('.end-month').value;
                 const pos = row.querySelector('.exp-pos').value, org = row.querySelector('.exp-org').value, months = row.querySelector('.exp-months').value;
                 if (sY || pos || org) {
-                    expCount++;
-                    expTbody.innerHTML += `<tr><td>${(sY && sM && eY && eM) ? `${sY}.${sM} ~ ${eY}.${eM}` : '-'}</td><td>${pos || '-'}</td><td>${org || '-'}</td><td>${months || '-'}</td></tr>`;
+                    expList.push({
+                        period: (sY && sM && eY && eM) ? `${sY}.${sM} ~ ${eY}.${eM}` : '-',
+                        pos: pos || '-',
+                        org: org || '-',
+                        months: months || '-'
+                    });
                 }
             });
-            if (expCount === 0) expTbody.innerHTML = `<tr><td colspan="3">경력 없음 (신규)</td><td>-</td></tr>`;
-            else expTbody.innerHTML += `<tr><th colspan="3">총 교원 경력</th><td><b>${document.getElementById('total_exp').value || '0개월'}</b></td></tr>`;
+        }
+
+        const MAX_EXP_PAGE1 = 3; // 1페이지 수용 가능한 최대 경력 건수
+
+        if (expList.length === 0) {
+            expTbody.innerHTML = `<tr><td colspan="3">${document.getElementById('noExpCheckbox').checked ? '경력 없음 (신규)' : '-'}</td><td>-</td></tr>`;
+        } else if (expList.length <= MAX_EXP_PAGE1) {
+            expList.forEach(item => {
+                expTbody.innerHTML += `<tr><td>${item.period}</td><td>${item.pos}</td><td>${item.org}</td><td>${item.months}</td></tr>`;
+            });
+            expTbody.innerHTML += `<tr><th colspan="3">총 교원 경력</th><td><b>${document.getElementById('total_exp').value || '0개월'}</b></td></tr>`;
+        } else {
+            expTbody.innerHTML = `<tr><td colspan="4" style="font-weight:bold; color:#555;">[주요 교원 경력 - 다음 페이지 수록 (총 ${expList.length}건)]</td></tr>`;
+
+            const pageDiv = document.createElement('div');
+            pageDiv.className = 'pdf-page';
+            let htmlContent = `<div class="sub-title">4. 주요 교원 경력 (전체)</div>`;
+            htmlContent += `<table class="sheet-table"><thead><tr><th style="width: 35%;">근무기간</th><th style="width: 20%;">직위</th><th style="width: 30%;">근무기관명</th><th style="width: 15%;">근무년월</th></tr></thead><tbody>`;
+
+            expList.forEach(item => {
+                htmlContent += `<tr><td>${item.period}</td><td>${item.pos}</td><td>${item.org}</td><td>${item.months}</td></tr>`;
+            });
+
+            htmlContent += `<tr><th colspan="3">총 교원 경력</th><td><b>${document.getElementById('total_exp').value || '0개월'}</b></td></tr>`;
+            htmlContent += `</tbody></table>`;
+            pageDiv.innerHTML = htmlContent;
+            extraExpContainer.appendChild(pageDiv);
         }
 
         const agreeCheck = document.querySelector('input[name="agree_check"]:checked');
