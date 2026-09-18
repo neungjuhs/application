@@ -122,7 +122,7 @@
             <tr>
                 <th style="width: 15%;">지원 과목 *</th>
                 <td style="width: 18%;">
-                    <select id="apply_subject" name="apply_subject" required onchange="autoNextOnSelect(this)">
+                    <select id="apply_subject" name="apply_subject" required>
                         <option value="">선택</option>
                         <option value="국어">국어</option>
                         <option value="수학">수학</option>
@@ -152,7 +152,7 @@
                 <td style="width: 22%;"><input type="text" id="user_name" name="user_name" required placeholder="홍길동"></td>
                 <th style="width: 11%;">성별 *</th>
                 <td style="width: 22%;">
-                    <select id="gender" name="gender" required onchange="autoNextOnSelect(this)">
+                    <select id="gender" name="gender" required>
                         <option value="">선택</option>
                         <option value="남">남</option>
                         <option value="여">여</option>
@@ -163,15 +163,15 @@
                 <th>생년월일 *</th>
                 <td colspan="2">
                     <div class="period-select-group">
-                        <select id="birth_year" required onchange="autoNextOnSelect(this)"></select>
-                        <select id="birth_month" required onchange="autoNextOnSelect(this)"></select>
-                        <select id="birth_day" required onchange="autoNextOnSelect(this)"></select>
+                        <select id="birth_year" required></select>
+                        <select id="birth_month" required></select>
+                        <select id="birth_day" required></select>
                     </div>
                 </td>
                 <th>휴대폰 *</th>
                 <td colspan="2">
                     <div class="period-select-group">
-                        <select id="phone_prefix" required style="width: 30%;" onchange="autoNextOnSelect(this)">
+                        <select id="phone_prefix" required style="width: 30%;">
                             <option value="010" selected>010</option>
                             <option value="011">011</option>
                             <option value="016">016</option>
@@ -180,9 +180,9 @@
                             <option value="019">019</option>
                         </select>
                         <span>-</span>
-                        <input type="tel" id="phone_mid" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;" oninput="autoFocusNext(this)">
+                        <input type="tel" id="phone_mid" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;">
                         <span>-</span>
-                        <input type="tel" id="phone_end" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;" oninput="autoFocusNext(this)">
+                        <input type="tel" id="phone_end" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;">
                     </div>
                 </td>
             </tr>
@@ -231,7 +231,7 @@
             <tbody id="teacherLicTbody">
                 <tr>
                     <td>
-                        <select class="lic-grade" required onchange="autoNextOnSelect(this)">
+                        <select class="lic-grade" required>
                             <option value="정교사(2급)" selected>정교사(2급)</option>
                             <option value="정교사(1급)">정교사(1급)</option>
                             <option value="준교사">준교사</option>
@@ -240,7 +240,7 @@
                     <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
                     <td><input type="text" class="lic-org" required></td>
                     <td>
-                        <select class="lic-type" required onchange="autoNextOnSelect(this)">
+                        <select class="lic-type" required>
                             <option value="주전공" selected>주전공</option>
                             <option value="복수전공">복수전공</option>
                             <option value="부전공">부전공</option>
@@ -248,9 +248,9 @@
                     </td>
                     <td>
                         <div class="period-select-group">
-                            <select class="lic-year" required onchange="autoNextOnSelect(this)"></select>
-                            <select class="lic-month" required onchange="autoNextOnSelect(this)"></select>
-                            <select class="lic-day" required onchange="autoNextOnSelect(this)"></select>
+                            <select class="lic-year" required></select>
+                            <select class="lic-month" required></select>
+                            <select class="lic-day" required></select>
                         </div>
                     </td>
                     <td>-</td>
@@ -318,7 +318,7 @@
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">1. 자신의 장·단점</label>
             <textarea id="cover_1" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_1', 500); autoFocusNext(this);"></textarea>
+                      oninput="updateItemCharCount(this, 'count_1', 500)"></textarea>
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
                 글자 수: <span id="count_1" style="color: #000;">0</span> / 500 자
             </div>
@@ -328,7 +328,7 @@
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">2. 학생 인성지도계획</label>
             <textarea id="cover_2" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_2', 500); autoFocusNext(this);"></textarea>
+                      oninput="updateItemCharCount(this, 'count_2', 500)"></textarea>
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
                 글자 수: <span id="count_2" style="color: #000;">0</span> / 500 자
             </div>
@@ -338,7 +338,7 @@
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">3. 교과학습 지도계획</label>
             <textarea id="cover_3" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_3', 500); autoFocusNext(this);"></textarea>
+                      oninput="updateItemCharCount(this, 'count_3', 500)"></textarea>
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
                 글자 수: <span id="count_3" style="color: #000;">0</span> / 500 자
             </div>
@@ -348,7 +348,7 @@
             <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">4. 본인의 교직관</label>
             <textarea id="cover_4" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
                       style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_4', 500); autoFocusNext(this);"></textarea>
+                      oninput="updateItemCharCount(this, 'count_4', 500)"></textarea>
             <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
                 글자 수: <span id="count_4" style="color: #000;">0</span> / 500 자
             </div>
@@ -395,7 +395,7 @@
 
         <!-- 버튼 그룹 -->
         <div class="btn-group">
-            <button type="button" class="btn-preview" onclick="downloadPDF()">여기를 눌러 PDF 저장 후 njhs1139@korea.kr로 첨부하여 보내주세요</button>
+            <button type="button" class="btn-preview" onclick="downloadPDF()">여기를 눌러 PDF 저장 후 njhs1139@korea.kr로 첨부하여 보내주세요<br>(※접수 후 061)373-9726으로 전화하여 접수여부를 꼭 확인해주세요※)</button>
         </div>
     </form>
 </div>
@@ -522,35 +522,6 @@
     let uploadedPhotoData = null;
     let canvas, ctx, isDrawing = false, hasSigned = false;
 
-    // === 포커스 자동 이동 기능 구현 ===
-    function getNextInputElement(currentElement) {
-        const form = document.getElementById('applyForm');
-        // 폼 내부의 포커스 가능한 요소들을 순서대로 추출
-        const elements = Array.from(form.querySelectorAll('input:not([readonly]):not([type="hidden"]), select, textarea, button:not([disabled])'));
-        const index = elements.indexOf(currentElement);
-        if (index > -1 && index < elements.length - 1) {
-            return elements[index + 1];
-        }
-        return null;
-    }
-
-    // 1) Text/Tel/Textarea 입력창 글자수 차면 이동
-    function autoFocusNext(element) {
-        const maxLen = element.maxLength;
-        if (maxLen && element.value.length >= maxLen) {
-            const nextEl = getNextInputElement(element);
-            if (nextEl) nextEl.focus();
-        }
-    }
-
-    // 2) Select 선택 항목 변경 완료 시 이동
-    function autoNextOnSelect(selectElement) {
-        if (selectElement.value !== "") {
-            const nextEl = getNextInputElement(selectElement);
-            if (nextEl) nextEl.focus();
-        }
-    }
-
     // 카카오/다음 도로명 주소 검색
     function execDaumPostcode() {
         new daum.Postcode({
@@ -634,11 +605,7 @@
     function previewUserPhoto(input) {
         if (input.files && input.files[0]) {
             const reader = new FileReader();
-            reader.onload = function(e) { 
-                uploadedPhotoData = e.target.result; 
-                const nextEl = getNextInputElement(input);
-                if (nextEl) nextEl.focus();
-            }
+            reader.onload = function(e) { uploadedPhotoData = e.target.result; }
             reader.readAsDataURL(input.files[0]);
         }
     }
@@ -690,11 +657,11 @@
         newRow.innerHTML = `
             <td>
                 <div class="period-select-group">
-                    <select class="edu-start-year" required onchange="autoNextOnSelect(this)">${yOpt}</select>
-                    <select class="edu-start-month" required onchange="autoNextOnSelect(this)">${mOpt}</select>
+                    <select class="edu-start-year" required>${yOpt}</select>
+                    <select class="edu-start-month" required>${mOpt}</select>
                     <span>~</span>
-                    <select class="edu-end-year" required onchange="autoNextOnSelect(this)">${yOpt}</select>
-                    <select class="edu-end-month" required onchange="autoNextOnSelect(this)">${mOpt}</select>
+                    <select class="edu-end-year" required>${yOpt}</select>
+                    <select class="edu-end-month" required>${mOpt}</select>
                 </div>
             </td>
             <td><input type="text" class="edu-school" required placeholder="${placeholderText}"></td>
@@ -710,7 +677,7 @@
         const newRow = document.createElement('tr');
         newRow.innerHTML = `
             <td>
-                <select class="lic-grade" required onchange="autoNextOnSelect(this)">
+                <select class="lic-grade" required>
                     <option value="정교사(2급)" selected>정교사(2급)</option>
                     <option value="정교사(1급)">정교사(1급)</option>
                     <option value="준교사">준교사</option>
@@ -718,8 +685,8 @@
             </td>
             <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
             <td><input type="text" class="lic-org" required></td>
-            <td><select class="lic-type" required onchange="autoNextOnSelect(this)"><option value="주전공">주전공</option><option value="복수전공">복수전공</option><option value="부전공" selected>부전공</option></select></td>
-            <td><div class="period-select-group"><select class="lic-year" required onchange="autoNextOnSelect(this)">${generateYearOptions(1980)}</select><select class="lic-month" onchange="autoNextOnSelect(this)">${generateMonthOptions()}</select><select class="lic-day" onchange="autoNextOnSelect(this)">${generateDayOptions()}</select></div></td>
+            <td><select class="lic-type" required><option value="주전공">주전공</option><option value="복수전공">복수전공</option><option value="부전공" selected>부전공</option></select></td>
+            <td><div class="period-select-group"><select class="lic-year" required>${generateYearOptions(1980)}</select><select class="lic-month">${generateMonthOptions()}</select><select class="lic-day">${generateDayOptions()}</select></div></td>
             <td><button type="button" class="btn-del" onclick="removeRow(this)">삭제</button></td>
         `;
         tbody.appendChild(newRow);
@@ -732,9 +699,9 @@
         const deleteBtn = isFirst ? '-' : `<button type="button" class="btn-del" onclick="removeRow(this, true)">삭제</button>`;
 
         newRow.innerHTML = `
-            <td><div class="period-select-group"><select class="start-year" required onchange="calculateRowPeriod(this); autoNextOnSelect(this);">${yOpt}</select><select class="start-month" required onchange="calculateRowPeriod(this); autoNextOnSelect(this);">${mOpt}</select><span>~</span><select class="end-year" required onchange="calculateRowPeriod(this); autoNextOnSelect(this);">${yOpt}</select><select class="end-month" required onchange="calculateRowPeriod(this); autoNextOnSelect(this);">${mOpt}</select></div></td>
+            <td><div class="period-select-group"><select class="start-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="start-month" required onchange="calculateRowPeriod(this)">${mOpt}</select><span>~</span><select class="end-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="end-month" required onchange="calculateRowPeriod(this)">${mOpt}</select></div></td>
             <td>
-                <select class="exp-pos" required onchange="autoNextOnSelect(this)">
+                <select class="exp-pos" required>
                     <option value="">선택</option>
                     <option value="정교사">정교사</option>
                     <option value="기간제교사">기간제교사</option>
