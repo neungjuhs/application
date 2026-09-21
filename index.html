@@ -3,961 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>학교법인 우정학원 능주고등학교 교사 채용 응시원서 및 자기소개서</title>
-    <!-- html2canvas & jsPDF 라이브러리 (PDF 변환용) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- 카카오/다음 도로명 주소검색 API -->
-    <script src="//t1.daumcdn.net/mapjsapi/bundle/postcode/prod/postcode.v2.js"></script>
+    <title>능주고등학교 - 채용 접수 확인서</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter & Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1e293b',
+                            900: '#0f172a',
+                        },
+                        brand: {
+                            50: '#f0f7ff',
+                            100: '#e0effe',
+                            600: '#1d4ed8',
+                            700: '#1e40af',
+                            800: '#1e3a8a',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Noto Sans KR', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        * { box-sizing: border-box; font-family: 'Pretendard', 'Malgun Gothic', sans-serif; }
-        body { background-color: #f4f6f9; margin: 0; padding: 30px 15px; }
-        .container { max-width: 900px; background: #fff; padding: 40px; margin: 0 auto; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        
-        h1 { text-align: center; color: #000; font-size: 24px; margin-bottom: 25px; letter-spacing: -1px; word-break: keep-all; }
-        
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-top: 25px; margin-bottom: 10px; }
-        .section-title { font-size: 16px; font-weight: bold; color: #000; border-left: 4px solid #000; padding-left: 8px; margin: 0; }
-        
-        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-        th, td { border: 1px solid #cbd5e1; padding: 8px; font-size: 13px; text-align: center; }
-        th { background-color: #f1f5f9; color: #000; font-weight: 600; }
-        
-        input[type="text"], input[type="email"], input[type="tel"], input[type="date"], select {
-            width: 100%; padding: 6px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px;
-        }
-        
-        .period-select-group { display: flex; align-items: center; justify-content: center; gap: 3px; }
-        .period-select-group select, .period-select-group input { padding: 4px 2px; font-size: 12px; text-align: center; }
-
-        .agree-box { background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; font-size: 13px; line-height: 1.6; color: #000; margin-bottom: 15px; }
-        
-        .btn-add { background-color: #0d9488; color: white; border: none; padding: 6px 12px; font-size: 13px; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-add:hover { background-color: #0f766e; }
-        
-        .btn-del { background-color: #ef4444; color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 4px; cursor: pointer; }
-        .btn-del:hover { background-color: #dc2626; }
-
-        .btn-search-addr { background-color: #3b82f6; color: white; border: none; padding: 6px 12px; font-size: 12px; border-radius: 4px; cursor: pointer; font-weight: bold; white-space: nowrap; }
-        .btn-search-addr:hover { background-color: #2563eb; }
-
-        .btn-clear-sig { background-color: #64748b; color: white; border: none; padding: 4px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
-        .btn-clear-sig:hover { background-color: #475569; }
-
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn-preview { width: 100%; background-color: #0d9488; color: white; border: none; padding: 16px; font-size: 16px; font-weight: bold; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
-        .btn-preview:hover { background-color: #0f766e; }
-        .btn-preview:disabled { background-color: #94a3b8; cursor: not-allowed; }
-
-        .no-exp-label { font-size: 13px; font-weight: bold; color: #0f766e; cursor: pointer; display: flex; align-items: center; gap: 4px; }
-
-        /* 서명 패드 스타일 */
-        .signature-container { border: 1px solid #cbd5e1; background: #fff; border-radius: 4px; display: inline-block; position: relative; touch-action: none; }
-        #sig-canvas { cursor: crosshair; display: block; border-radius: 4px; }
-
-        /* PDF 렌더링용 숨김 영역 */
-        #pdf-render-area { position: absolute; left: -9999px; top: -9999px; width: 210mm; background: #fff; }
-        
-        .pdf-page { 
-            width: 210mm; 
-            height: 297mm; 
-            padding: 15mm 20mm; 
-            background: #fff; 
-            position: relative; 
-            box-sizing: border-box; 
-            overflow: hidden; 
-        }
-        
-        .paper-title { text-align: center; font-size: 20px; font-weight: bold; margin-bottom: 20px; text-decoration: underline; letter-spacing: -1px; }
-        .sub-title { font-size: 13px; font-weight: bold; margin-top: 15px; margin-bottom: 5px; border-left: 3px solid #000; padding-left: 5px; }
-        table.sheet-table { width: 100%; border-collapse: collapse; margin-bottom: 8px; table-layout: fixed; }
-        table.sheet-table th, table.sheet-table td { border: 1px solid #000; padding: 5px 4px; font-size: 11px; text-align: center; word-break: break-all; height: 26px; }
-        table.sheet-table th { background-color: #f2f2f2; font-weight: bold; }
-        .photo-box { width: 100px; height: 130px; object-fit: cover; display: block; margin: 0 auto; }
-        .photo-placeholder { width: 100px; height: 130px; line-height: 130px; background: #fafafa; color: #aaa; font-size: 10px; border: 1px dashed #ccc; margin: 0 auto; }
-        
-        /* PDF용 동의박스 스타일 */
-        .pdf-agree-section { border: 1px solid #000; padding: 8px 10px; margin-top: 10px; font-size: 10px; line-height: 1.4; }
-        .pdf-agree-item { margin-bottom: 6px; }
-        .pdf-agree-item:last-child { margin-bottom: 0; }
-        .pdf-agree-title { font-weight: bold; margin-bottom: 2px; }
-        .pdf-agree-check { text-align: right; font-weight: bold; margin-top: 2px; }
-
-        .footer-declaration { text-align: center; font-size: 11px; margin-top: 15px; line-height: 1.8; position: relative; }
-        .footer-signature { text-align: center; font-size: 16px; font-weight: bold; margin-top: 20px; }
-
-        /* PDF 서명 이미지 출력 스타일 */
-        .pdf-signature-img { position: absolute; right: 190px; bottom: -5px; height: 32px; width: auto; object-fit: contain; }
-
-        /* 자기소개서 PDF 전용 레이아웃 스타일 */
-        .pdf-cover-container { display: flex; flex-direction: column; flex-grow: 1; gap: 12px; }
-        .pdf-cover-item { margin-bottom: 8px; }        
-        .pdf-cover-title { font-weight: bold; margin-bottom: 3px; color: #000; font-size: 10pt; }        
-        .pdf-cover-content { 
-            font-family: 'HYSinMyeongJo-Medium', 'HY신명조', 'HYSinMyeongJo', '신명조', serif; 
-            font-size: 9.5pt; 
-            line-height: 1.35; 
-            text-align: justify; 
-            white-space: pre-wrap; 
-            word-break: break-all; 
-            color: #000; 
-            border: 1px solid #000; 
-            padding: 6px 8px; 
-            min-height: 95px; 
-            box-sizing: border-box;
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: #ffffff !important;
+            }
+            .print-card {
+                box-shadow: none !important;
+                border: 1px solid #e2e8f0 !important;
+            }
         }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen text-slate-800 font-sans flex flex-col justify-between items-center p-4 sm:p-6 lg:p-10">
 
-<div class="container">
-    <h1>학교법인 우정학원 능주고등학교 교사 채용 <br> 응시원서 및 자기소개서</h1>
-
-    <form id="applyForm" onsubmit="return false;">
-        <!-- 1. 기본 인적사항 -->
-        <div class="section-header">
-            <h2 class="section-title">1. 기본 인적사항</h2>
-        </div>
-        <table>
-            <tr>
-                <th style="width: 15%;">지원 과목 *</th>
-                <td style="width: 18%;">
-                    <select id="apply_subject" name="apply_subject" required>
-                        <option value="">선택</option>
-                        <option value="국어">국어</option>
-                        <option value="수학">수학</option>
-                        <option value="영어">영어</option>
-                        <option value="역사">역사</option>
-                        <option value="일반사회">일반사회</option>
-                        <option value="지리">지리</option>
-                        <option value="윤리">윤리</option>
-                        <option value="물리">물리</option>
-                        <option value="화학">화학</option>
-                        <option value="생물">생물</option>
-                        <option value="지구과학">지구과학</option>
-                        <option value="체육">체육</option>
-                        <option value="음악">음악</option>
-                        <option value="미술">미술</option>
-                        <option value="기술·가정">기술·가정</option>
-                        <option value="정보">정보</option>
-                        <option value="중국어">중국어</option>
-                        <option value="일본어">일본어</option>
-                        <option value="보건">보건</option>
-                        <option value="전문상담">전문상담</option>
-                        <option value="영양">영양</option>
-                        <option value="기타">기타</option>
-                    </select>
-                </td>
-                <th style="width: 12%;">성명 *</th>
-                <td style="width: 22%;"><input type="text" id="user_name" name="user_name" required placeholder="홍길동"></td>
-                <th style="width: 11%;">성별 *</th>
-                <td style="width: 22%;">
-                    <select id="gender" name="gender" required>
-                        <option value="">선택</option>
-                        <option value="남">남</option>
-                        <option value="여">여</option>
-                    </select>
-                </td>
-            </tr>
-            <tr>
-                <th>생년월일 *</th>
-                <td colspan="2">
-                    <div class="period-select-group">
-                        <select id="birth_year" required></select>
-                        <select id="birth_month" required></select>
-                        <select id="birth_day" required></select>
-                    </div>
-                </td>
-                <th>휴대폰 *</th>
-                <td colspan="2">
-                    <div class="period-select-group">
-                        <select id="phone_prefix" required style="width: 30%;">
-                            <option value="010" selected>010</option>
-                            <option value="011">011</option>
-                            <option value="016">016</option>
-                            <option value="017">017</option>
-                            <option value="018">018</option>
-                            <option value="019">019</option>
-                        </select>
-                        <span>-</span>
-                        <input type="tel" id="phone_mid" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;">
-                        <span>-</span>
-                        <input type="tel" id="phone_end" inputmode="numeric" pattern="[0-9]*" maxlength="4" placeholder="1234" required style="width: 32%;">
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th>현주소 *</th>
-                <td colspan="5" style="text-align: left;">
-                    <div style="display: flex; gap: 8px; margin-bottom: 6px;">
-                        <input type="text" id="postcode" placeholder="우편번호" required readonly style="width: 120px; background-color: #f8fafc;">
-                        <button type="button" class="btn-search-addr" onclick="execDaumPostcode()">주소 검색</button>
-                    </div>
-                    <div style="display: flex; gap: 8px; flex-direction: column;">
-                        <input type="text" id="address_main" placeholder="주소 검색 버튼을 클릭하여 입력하세요." required readonly style="background-color: #f8fafc;">
-                        <input type="text" id="address_detail" placeholder="상세주소를 입력해주세요 (예: 101동 202호)" required>
-                    </div>
-                </td>
-            </tr>
-            <tr>
-                <th>E-mail *</th>
-                <td colspan="5"><input type="email" id="user_email" name="user_email" required placeholder="example@email.com"></td>
-            </tr>
-            <tr>
-                <th>사진 첨부 *</th>
-                <td colspan="5" style="text-align: left;">
-                    <input type="file" id="photo_input" name="photo" accept="image/*" required onchange="previewUserPhoto(this)">
-                    <span style="font-size: 11px; color: #64748b; display: block; margin-top: 4px;">* 최근 6개월 이내 촬영한 사진(3*4cm 규격 권장)</span>
-                </td>
-            </tr>
-        </table>
-
-        <!-- 2. 교원자격증 -->
-        <div class="section-header">
-            <h2 class="section-title">2. 교원자격증</h2>
-            <button type="button" class="btn-add" onclick="addTeacherLicRow()">+ 자격증 추가하기</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 15%;">종별/급별</th>
-                    <th style="width: 18%;">표시과목</th>
-                    <th style="width: 20%;">발급기관명</th>
-                    <th style="width: 15%;">전공 구분</th>
-                    <th style="width: 27%;">자격증 발급일</th>
-                    <th style="width: 5%;">삭제</th>
-                </tr>
-            </thead>
-            <tbody id="teacherLicTbody">
-                <tr>
-                    <td>
-                        <select class="lic-grade" required>
-                            <option value="정교사(2급)" selected>정교사(2급)</option>
-                            <option value="정교사(1급)">정교사(1급)</option>
-                            <option value="준교사">준교사</option>
-                        </select>
-                    </td>
-                    <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
-                    <td><input type="text" class="lic-org" required></td>
-                    <td>
-                        <select class="lic-type" required>
-                            <option value="주전공" selected>주전공</option>
-                            <option value="복수전공">복수전공</option>
-                            <option value="부전공">부전공</option>
-                        </select>
-                    </td>
-                    <td>
-                        <div class="period-select-group">
-                            <select class="lic-year" required></select>
-                            <select class="lic-month" required></select>
-                            <select class="lic-day" required></select>
-                        </div>
-                    </td>
-                    <td>-</td>
-                </tr>
-            </tbody>
-        </table>
-
-        <!-- 3. 학력사항 -->
-        <div class="section-header">
-            <h2 class="section-title">3. 학력사항</h2>
-            <button type="button" class="btn-add" onclick="addEducationRow('○○학교')">+ 학력 추가하기</button>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th style="width: 38%;">재학기간</th>
-                    <th style="width: 20%;">학교명</th>
-                    <th style="width: 20%;">학과명</th>
-                    <th style="width: 17%;">비고</th>
-                    <th style="width: 5%;">삭제</th>
-                </tr>
-            </thead>
-            <tbody id="eduTbody"></tbody>
-        </table>
-
-        <!-- 4. 교원 경력 -->
-        <div class="section-header">
-            <h2 class="section-title">4. 교원 경력 (정규, 기간제, 시간제)</h2>
-            <div style="display: flex; align-items: center; gap: 15px;">
-                <label class="no-exp-label">
-                    <input type="checkbox" id="noExpCheckbox" onchange="toggleNoExperience(this)"> 경력 없음 (신규)
-                </label>
-                <button type="button" class="btn-add" id="btnAddExp" onclick="addExperienceRow()">+ 경력 추가하기</button>
-            </div>
-        </div>
-        <p style="font-size: 11px; color: #ef4444; margin-top:-5px; margin-bottom:8px;">※ 산학겸임교사, 명예교사, 강사 경력은 제외</p>
+    <main class="w-full max-w-3xl bg-white rounded-2xl shadow-xl overflow-hidden print-card border border-slate-200/80 my-auto">
         
-        <table id="expTable">
-            <thead>
-                <tr>
-                    <th style="width: 42%;">근무기간</th>
-                    <th style="width: 15%;">직위</th>
-                    <th style="width: 23%;">근무기관명</th>
-                    <th style="width: 15%;">근무년월</th>
-                    <th style="width: 5%;">삭제</th>
-                </tr>
-            </thead>
-            <tbody id="expTbody"></tbody>
-            <tfoot>
-                <tr>
-                    <th colspan="3">총 경력</th>
-                    <td colspan="2">
-                        <input type="text" id="total_exp" placeholder="자동 계산" readonly style="background-color: #f8fafc; font-weight: bold; color: #000; text-align: center;">
-                    </td>
-                </tr>
-            </tfoot>
-        </table>
-
-        <!-- 5. 자기소개서 -->
-        <div class="section-header">
-            <h2 class="section-title">5. 자기소개서 (항목별 500자 이내)</h2>
-        </div>
-        
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">1. 자신의 장·단점</label>
-            <textarea id="cover_1" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
-                      style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_1', 500)"></textarea>
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
-                글자 수: <span id="count_1" style="color: #000;">0</span> / 500 자
+        <!-- School Header Banner -->
+        <header class="bg-gradient-to-r from-brand-800 via-brand-700 to-navy-900 text-white p-6 sm:p-8 relative">
+            <div class="flex items-center justify-between flex-wrap gap-4">
+                <div class="flex items-center space-x-3">
+                    <div class="w-12 h-12 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white text-2xl font-bold">
+                        <i class="fa-solid font-bold fa-school"></i>
+                    </div>
+                    <div>
+                        <span class="text-xs uppercase tracking-widest text-blue-200 font-medium">NEUNGJU HIGH SCHOOL</span>
+                        <h1 class="text-2xl sm:text-3xl font-bold tracking-tight">능주고등학교</h1>
+                    </div>
+                </div>
+                <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-200 border border-emerald-400/30">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 mr-2 animate-pulse"></span>
+                    접수 완료 (Submitted)
+                </span>
             </div>
-        </div>
+        </header>
 
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">2. 학생 인성지도계획</label>
-            <textarea id="cover_2" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
-                      style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_2', 500)"></textarea>
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
-                글자 수: <span id="count_2" style="color: #000;">0</span> / 500 자
+        <div class="p-6 sm:p-10 space-y-8">
+
+            <!-- Confirmation Message Body -->
+            <div class="bg-brand-50/50 rounded-xl p-5 sm:p-6 border border-brand-100 text-slate-700 leading-relaxed space-y-4">
+                <p class="text-base sm:text-lg font-medium text-slate-800">
+                    능주고등학교 채용에 지원해 주셔서 감사드립니다.
+                </p>
+                <p>
+                    제출하신 응시원서가 성공적으로 접수되었습니다.<br>
+                    서류 심사 결과 및 향후 전형 일정은 추후 개별 안내해 드릴 예정입니다.
+                </p>
+                <p>
+                    귀한 시간 내어 응시해 주심에 감사드리며, <br> 앞으로 능주고등학교에서 좋은 인연으로 함께 할 수 있기를 진심으로 기대합니다.
+                </p>
+                <p class="font-semibold text-slate-900 pt-2">
+                    감사합니다.
+                </p>
             </div>
-        </div>
 
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">3. 교과학습 지도계획</label>
-            <textarea id="cover_3" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
-                      style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_3', 500)"></textarea>
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
-                글자 수: <span id="count_3" style="color: #000;">0</span> / 500 자
-            </div>
-        </div>
+            <!-- Video Section -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-md font-bold text-slate-800 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-play text-brand-600"></i> 능주고등학교 홍보영상
+                    </h3>
+                    <span class="text-xs text-slate-500">* 소리를 들으시려면 영상의 음소거를 해제해 주세요.</span>
+                </div>
 
-        <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-            <label style="font-size: 14px; font-weight: bold; color: #000; display: block; margin-bottom: 8px;">4. 본인의 교직관</label>
-            <textarea id="cover_4" required maxlength="500" rows="4" placeholder="내용을 입력해주세요." 
-                      style="width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 4px; font-size: 13px; line-height: 1.6; resize: vertical;" 
-                      oninput="updateItemCharCount(this, 'count_4', 500)"></textarea>
-            <div style="text-align: right; font-size: 12px; color: #64748b; margin-top: 5px; font-weight: bold;">
-                글자 수: <span id="count_4" style="color: #000;">0</span> / 500 자
-            </div>
-        </div>
-
-        <!-- 6. 확인 및 동의사항 -->
-        <div class="section-header">
-            <h2 class="section-title">6. 확인 및 동의사항</h2>
-        </div>
-        
-        <div class="agree-box">
-            위 기재 사항은 사실과 틀림없으며, 채용 공고의 채용의 제한 사유 및 지원 자격을 확인하였고 허위 내용이 있을 경우, 계약해지 사유가 될 수 있음을 확인합니다.
-            <div style="margin-top: 8px; text-align: right;">
-                <strong>응모불가 대상인 채용제한자에 해당여부 조회 동의:</strong>
-                <label><input type="radio" name="agree_check" value="동의함" required> 동의함</label>
-                <label><input type="radio" name="agree_check" value="동의하지 않음"> 동의하지 않음</label>
-            </div>
-        </div>
-
-        <div class="agree-box">
-            개인정보보호법 제15조 1항(개인정보의 수집·이용)에 따라 학교법인 우정학원 교사 채용을 위한 본인의 이름, 주소, 전화번호 등 개인정보를 제공하는 것에 동의합니다.
-            <div style="margin-top: 8px; text-align: right;">
-                <strong>개인정보 수집·이용 동의:</strong>
-                <label><input type="radio" name="agree_privacy" value="동의함" required> 동의함</label>
-                <label><input type="radio" name="agree_privacy" value="동의하지 않음"> 동의하지 않음</label>
-            </div>
-        </div>
-
-        <!-- 서명 입력 패드 영역 추가 -->
-        <div class="section-header">
-            <h2 class="section-title">7. 지원자 서명 *</h2>
-            <button type="button" class="btn-clear-sig" onclick="clearSignature()">서명 다시하기</button>
-        </div>
-        <div style="text-align: center; margin-bottom: 15px;">
-            <div class="signature-container">
-                <canvas id="sig-canvas" width="350" height="120"></canvas>
-            </div>
-            <p style="font-size: 11px; color: #64748b; margin-top: 4px;">* 마우스 또는 태블릿/모바일 터치를 이용해 박스 안에 서명해 주세요.</p>
-        </div>
-
-        <p style="text-align: center; font-weight: bold; margin-top: 35px; color: #000; font-size: 18px;">
-            학교법인 우정학원 능주고등학교장 귀하
-        </p>
-
-        <!-- 버튼 그룹 -->
-        <div class="btn-group">
-            <button type="button" class="btn-preview" onclick="downloadPDF()">여기를 눌러 PDF 저장 후 njhs1139@korea.kr로 첨부하여 보내주세요<br>(※접수 후 061)372-1193으로 전화하여 접수여부를 꼭 확인해주세요※)</button>
-        </div>
-    </form>
-</div>
-
-<!-- PDF 생성용 동적 페이지 컨테이너 -->
-<div id="pdf-render-area">
-    <!-- 1페이지: 입사지원서 -->
-    <div id="page-application" class="pdf-page">
-        
-        <div style="position: relative; margin-bottom: 10px;">
-            <div class="paper-title" style="margin: 0; padding-top: 10px; padding-bottom: 10px; font-size: 19px; line-height: 1.4;">
-                학교법인 우정학원 능주고등학교 교사 채용<br>응시원서 및 자기소개서
-            </div>
-            
-            <div style="position: absolute; bottom: 0; left: 0; width: 110px; border: 1px solid #000; text-align: center;">
-                <div style="background-color: #f2f2f2; border-bottom: 1px solid #000; padding: 4px 0; font-size: 11px; font-weight: bold;">접수번호</div>
-                <div style="height: 30px; line-height: 30px; color: #666; font-size: 10px;">(지원자 미기재)</div>
-            </div>
-        </div>
-
-        <div class="sub-title" style="margin-top: 5px;">1. 기본 인적사항</div>
-        <table class="sheet-table">
-            <tr>
-                <th style="width: 15%;">지원과목</th>
-                <td style="width: 20%;"><span id="doc_subject">-</span></td>
-                <th style="width: 15%;">성 명</th>
-                <td style="width: 20%;"><span id="doc_name">-</span></td>
-                <th style="width: 10%;">성 별</th>
-                <td style="width: 20%;"><span id="doc_gender">-</span></td>
-                <td rowspan="4" style="width: 110px; padding: 2px;">
-                    <img id="doc_photo" class="photo-box" src="" alt="사진" style="display:none;">
-                    <div id="doc_photo_ph" class="photo-placeholder">사진 미첨부</div>
-                </td>
-            </tr>
-            <tr>
-                <th>생년월일</th>
-                <td colspan="3"><span id="doc_birthdate">-</span></td>
-                <th>연락처</th>
-                <td><span id="doc_phone">-</span></td>
-            </tr>
-            <tr>
-                <th>주 소</th>
-                <td colspan="5" style="text-align: center;"><span id="doc_address">-</span></td>
-            </tr>
-            <tr>
-                <th>E-mail</th>
-                <td colspan="5" style="text-align: center;"><span id="doc_email">-</span></td>
-            </tr>
-        </table>
-
-        <div class="sub-title">2. 교원자격증</div>
-        <table class="sheet-table">
-            <thead>
-                <tr>
-                    <th style="width: 18%;">종별/급별</th>
-                    <th style="width: 18%;">표시과목</th>
-                    <th style="width: 24%;">발급기관명</th>
-                    <th style="width: 15%;">전공구분</th>
-                    <th style="width: 25%;">발급일자</th>
-                </tr>
-            </thead>
-            <tbody id="doc_lic_body"></tbody>
-        </table>
-
-        <div class="sub-title">3. 학력사항</div>
-        <table class="sheet-table">
-            <thead>
-                <tr>
-                    <th style="width: 35%;">재학기간</th>
-                    <th style="width: 25%;">학교명</th>
-                    <th style="width: 25%;">학과(전공)명</th>
-                    <th style="width: 15%;">비고</th>
-                </tr>
-            </thead>
-            <tbody id="doc_edu_body"></tbody>
-        </table>
-
-        <div class="sub-title">4. 주요 교원 경력</div>
-        <table class="sheet-table">
-            <thead>
-                <tr>
-                    <th style="width: 35%;">근무기간</th>
-                    <th style="width: 20%;">직위</th>
-                    <th style="width: 30%;">근무기관명</th>
-                    <th style="width: 15%;">근무년월</th>
-                </tr>
-            </thead>
-            <tbody id="doc_exp_body"></tbody>
-        </table>
-
-        <div class="pdf-agree-section">
-            <div class="pdf-agree-item">
-                <div class="pdf-agree-title">1. 응모불가 대상인 채용제한자에 해당여부 조회 동의</div>
-                <div>위 기재 사항은 사실과 틀림없으며, 채용 공고의 지원 자격 및 제한 사유를 확인하였고 허위 내용이 있을 경우 계약 해지 사유가 될 수 있음을 확인합니다.</div>
-                <div class="pdf-agree-check">
-                    [ <span id="doc_agree_check_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_check_no">☐</span> 동의하지 않음 ]
+                <!-- Archive.org MP4 Video Player Container -->
+                <div class="relative bg-slate-900 rounded-xl overflow-hidden shadow-md aspect-video flex items-center justify-center">
+                    <video 
+                        id="videoPlayer" 
+                        controls 
+                        autoplay 
+                        muted 
+                        playsinline 
+                        preload="metadata"
+                        class="w-full h-full object-contain">
+                        <!-- 아래 src 속성에 추출하신 Archive.org MP4 파일 직접 링크를 넣으세요 -->
+                        <source src="https://archive.org/download/your-identifier/your-video.mp4" type="video/mp4">
+                        사용하시는 브라우저는 비디오 태그를 지원하지 않습니다.
+                    </video>
                 </div>
             </div>
-            <div class="pdf-agree-item" style="border-top: 1px dashed #ccc; padding-top: 4px; margin-top: 4px;">
-                <div class="pdf-agree-title">2. 개인정보 수집·이용 동의</div>
-                <div>개인정보보호법 제15조 1항에 따라 계약제교원 채용을 위한 본인의 개인정보 제공에 동의합니다.</div>
-                <div class="pdf-agree-check">
-                    [ <span id="doc_agree_privacy_yes">☐</span> 동의함 &nbsp;&nbsp;&nbsp; <span id="doc_agree_privacy_no">☐</span> 동의하지 않음 ]
-                </div>
-            </div>
+
         </div>
 
-        <!-- 하단 지원자 서명 영역 -->
-        <div class="footer-declaration">
-            <span id="doc_today_date"></span><br>
-            지원자 : <span id="doc_sign_name" style="font-weight: bold;">-</span> (서명/인)
-            <img id="doc_signature_img" class="pdf-signature-img" src="" alt="서명" style="display:none;">
-        </div>
+    </main>
 
-        <div class="footer-signature">
-            학교법인 우정학원 능주고등학교장 귀하
-        </div>
-    </div>
-    
-    <div id="cover-letter-pages-container"></div>
-</div>
-
-<script>
-    let uploadedPhotoData = null;
-    let canvas, ctx, isDrawing = false, hasSigned = false;
-
-    // 카카오/다음 도로명 주소 검색
-    function execDaumPostcode() {
-        new daum.Postcode({
-            oncomplete: function(data) {
-                let fullAddr = data.roadAddress || data.jibunAddress;
-                let extraAddr = '';
-
-                if(data.bname !== '' && /[동|리]$/g.test(data.bname)){
-                    extraAddr += data.bname;
-                }
-                if(data.buildingName !== '' && data.selectType === 'R'){
-                    extraAddr += (extraAddr !== '' ? ', ' + data.buildingName : data.buildingName);
-                }
-                if(extraAddr !== ''){
-                    fullAddr += ' (' + extraAddr + ')';
-                }
-
-                document.getElementById('postcode').value = data.zonecode;
-                document.getElementById('address_main').value = fullAddr;
-                document.getElementById('address_detail').focus();
-            }
-        }).open();
-    }
-
-    // 캔버스 수기 서명 로직
-    function initSignatureCanvas() {
-        canvas = document.getElementById('sig-canvas');
-        ctx = canvas.getContext('2d');
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = "round";
-
-        function getPos(e) {
-            const rect = canvas.getBoundingClientRect();
-            let clientX = e.clientX, clientY = e.clientY;
-            if (e.touches && e.touches.length > 0) {
-                clientX = e.touches[0].clientX;
-                clientY = e.touches[0].clientY;
-            }
-            return { x: clientX - rect.left, y: clientY - rect.top };
-        }
-
-        function startDraw(e) {
-            isDrawing = true;
-            hasSigned = true;
-            const pos = getPos(e);
-            ctx.beginPath();
-            ctx.moveTo(pos.x, pos.y);
-            if (e.type === 'touchstart') e.preventDefault();
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            const pos = getPos(e);
-            ctx.lineTo(pos.x, pos.y);
-            ctx.stroke();
-            if (e.type === 'touchmove') e.preventDefault();
-        }
-
-        function stopDraw() { isDrawing = false; }
-
-        canvas.addEventListener('mousedown', startDraw);
-        canvas.addEventListener('mousemove', draw);
-        canvas.addEventListener('mouseup', stopDraw);
-        canvas.addEventListener('mouseleave', stopDraw);
-
-        canvas.addEventListener('touchstart', startDraw, { passive: false });
-        canvas.addEventListener('touchmove', draw, { passive: false });
-        canvas.addEventListener('touchend', stopDraw);
-    }
-
-    function clearSignature() {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSigned = false;
-    }
-
-    function updateItemCharCount(obj, countId, max) {
-        document.getElementById(countId).innerText = obj.value.length.toLocaleString();
-    }
-
-    function previewUserPhoto(input) {
-        if (input.files && input.files[0]) {
-            const reader = new FileReader();
-            reader.onload = function(e) { uploadedPhotoData = e.target.result; }
-            reader.readAsDataURL(input.files[0]);
-        }
-    }
-
-    function generateYearOptions(startYear = 1970, maxYear = null) {
-        const currentYear = maxYear !== null ? maxYear : new Date().getFullYear();
-        let options = '<option value="">년도</option>';
-        for (let y = currentYear; y >= startYear; y--) { options += `<option value="${y}">${y}년</option>`; }
-        return options;
-    }
-
-    function generateMonthOptions() {
-        let options = '<option value="">월</option>';
-        for (let m = 1; m <= 12; m++) {
-            const mStr = m < 10 ? '0' + m : m;
-            options += `<option value="${mStr}">${m}월</option>`;
-        }
-        return options;
-    }
-
-    function generateDayOptions() {
-        let options = '<option value="">일</option>';
-        for (let d = 1; d <= 31; d++) {
-            const dStr = d < 10 ? '0' + d : d;
-            options += `<option value="${dStr}">${d}일</option>`;
-        }
-        return options;
-    }
-
-    function initBirthdateSelects() {
-        document.getElementById('birth_year').innerHTML = generateYearOptions(1950, 2010);
-        document.getElementById('birth_month').innerHTML = generateMonthOptions();
-        document.getElementById('birth_day').innerHTML = generateDayOptions();
-    }
-
-    function initTeacherLicSelects() {
-        const yOpt = generateYearOptions(1980), mOpt = generateMonthOptions(), dOpt = generateDayOptions();
-        document.querySelectorAll('#teacherLicTbody .lic-year').forEach(el => el.innerHTML = yOpt);
-        document.querySelectorAll('#teacherLicTbody .lic-month').forEach(el => el.innerHTML = mOpt);
-        document.querySelectorAll('#teacherLicTbody .lic-day').forEach(el => el.innerHTML = dOpt);
-    }
-
-    function addEducationRow(placeholderText = "○○대학교", isFirst = false) {
-        const tbody = document.getElementById('eduTbody');
-        const newRow = document.createElement('tr');
-        const yOpt = generateYearOptions(1970), mOpt = generateMonthOptions();
-        const deleteBtn = isFirst ? '-' : `<button type="button" class="btn-del" onclick="removeRow(this)">삭제</button>`;
-
-        newRow.innerHTML = `
-            <td>
-                <div class="period-select-group">
-                    <select class="edu-start-year" required>${yOpt}</select>
-                    <select class="edu-start-month" required>${mOpt}</select>
-                    <span>~</span>
-                    <select class="edu-end-year" required>${yOpt}</select>
-                    <select class="edu-end-month" required>${mOpt}</select>
-                </div>
-            </td>
-            <td><input type="text" class="edu-school" required placeholder="${placeholderText}"></td>
-            <td><input type="text" class="edu-major" required placeholder="○○학과"></td>
-            <td><input type="text" class="edu-note" required placeholder="졸업/수료 등"></td>
-            <td>${deleteBtn}</td>
-        `;
-        tbody.appendChild(newRow);
-    }
-
-    function addTeacherLicRow() {
-        const tbody = document.getElementById('teacherLicTbody');
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>
-                <select class="lic-grade" required>
-                    <option value="정교사(2급)" selected>정교사(2급)</option>
-                    <option value="정교사(1급)">정교사(1급)</option>
-                    <option value="준교사">준교사</option>
-                </select>
-            </td>
-            <td><input type="text" class="lic-subject" required placeholder="예: 국어, 영어 등"></td>
-            <td><input type="text" class="lic-org" required></td>
-            <td><select class="lic-type" required><option value="주전공">주전공</option><option value="복수전공">복수전공</option><option value="부전공" selected>부전공</option></select></td>
-            <td><div class="period-select-group"><select class="lic-year" required>${generateYearOptions(1980)}</select><select class="lic-month">${generateMonthOptions()}</select><select class="lic-day">${generateDayOptions()}</select></div></td>
-            <td><button type="button" class="btn-del" onclick="removeRow(this)">삭제</button></td>
-        `;
-        tbody.appendChild(newRow);
-    }
-
-    function addExperienceRow(isFirst = false) {
-        const tbody = document.getElementById('expTbody');
-        const newRow = document.createElement('tr');
-        const yOpt = generateYearOptions(1980), mOpt = generateMonthOptions();
-        const deleteBtn = isFirst ? '-' : `<button type="button" class="btn-del" onclick="removeRow(this, true)">삭제</button>`;
-
-        newRow.innerHTML = `
-            <td><div class="period-select-group"><select class="start-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="start-month" required onchange="calculateRowPeriod(this)">${mOpt}</select><span>~</span><select class="end-year" required onchange="calculateRowPeriod(this)">${yOpt}</select><select class="end-month" required onchange="calculateRowPeriod(this)">${mOpt}</select></div></td>
-            <td>
-                <select class="exp-pos" required>
-                    <option value="">선택</option>
-                    <option value="정교사">정교사</option>
-                    <option value="기간제교사">기간제교사</option>
-                    <option value="시간제기간제">시간제기간제</option>
-                    <option value="기타">기타</option>
-                </select>
-            </td>
-            <td><input type="text" class="exp-org" required></td>
-            <td><input type="text" class="exp-months" placeholder="자동 계산" readonly style="background-color: #f8fafc; text-align: center;"></td>
-            <td>${deleteBtn}</td>
-        `;
-        tbody.appendChild(newRow);
-    }
-
-    function toggleNoExperience(checkbox) {
-        const tbody = document.getElementById('expTbody');
-        const btnAddExp = document.getElementById('btnAddExp');
-        const totalInput = document.getElementById('total_exp');
-
-        if (checkbox.checked) {
-            tbody.querySelectorAll('input, select, button').forEach(el => el.disabled = true);
-            btnAddExp.disabled = true; btnAddExp.style.opacity = '0.5';
-            totalInput.value = '해당없음 (신규)';
-        } else {
-            tbody.querySelectorAll('input, select, button').forEach(el => el.disabled = false);
-            btnAddExp.disabled = false; btnAddExp.style.opacity = '1';
-            calculateTotalExperience();
-        }
-    }
-
-    function removeRow(btn, isExp = false) { btn.closest('tr').remove(); if (isExp) calculateTotalExperience(); }
-
-    function calculateRowPeriod(selectElem) {
-        const row = selectElem.closest('tr');
-        const sY = parseInt(row.querySelector('.start-year').value, 10), sM = parseInt(row.querySelector('.start-month').value, 10);
-        const eY = parseInt(row.querySelector('.end-year').value, 10), eM = parseInt(row.querySelector('.end-month').value, 10);
-        const expMonthsInput = row.querySelector('.exp-months');
-
-        if (sY && sM && eY && eM) {
-            const startTotal = (sY * 12) + sM, endTotal = (eY * 12) + eM;
-            if (endTotal < startTotal) { alert('종료일은 시작일보다 이전일 수 없습니다.'); expMonthsInput.value = ''; } 
-            else {
-                const diff = (endTotal - startTotal) + 1;
-                const y = Math.floor(diff / 12), m = diff % 12;
-                expMonthsInput.value = (y > 0 && m > 0) ? `${y}년 ${m}개월` : (y > 0 ? `${y}년` : `${m}개월`);
-            }
-        } else { expMonthsInput.value = ''; }
-        calculateTotalExperience();
-    }
-
-    function calculateTotalExperience() {
-        if (document.getElementById('noExpCheckbox').checked) return;
-        let totalMonthsSum = 0;
-        document.querySelectorAll('#expTbody tr').forEach(row => {
-            const sY = parseInt(row.querySelector('.start-year').value, 10), sM = parseInt(row.querySelector('.start-month').value, 10);
-            const eY = parseInt(row.querySelector('.end-year').value, 10), eM = parseInt(row.querySelector('.end-month').value, 10);
-            if (sY && sM && eY && eM && (eY * 12 + eM >= sY * 12 + sM)) { totalMonthsSum += ((eY * 12) + eM) - ((sY * 12) + sM) + 1; }
-        });
-        const y = Math.floor(totalMonthsSum / 12), m = totalMonthsSum % 12;
-        const totalInput = document.getElementById('total_exp');
-        if (totalMonthsSum === 0) totalInput.value = '';
-        else totalInput.value = (y > 0 && m > 0) ? `${y}년 ${m}개월` : (y > 0 ? `${y}년` : `${m}개월`);
-    }
-
-    function populatePaperTemplate() {
-        const userName = document.getElementById('user_name').value || '-';
-        document.getElementById('doc_subject').innerText = document.getElementById('apply_subject').value || '-';
-        document.getElementById('doc_name').innerText = userName;
-        document.getElementById('doc_gender').innerText = document.getElementById('gender').value || '-';
-        document.getElementById('doc_sign_name').innerText = userName;
-
-        const by = document.getElementById('birth_year').value, bm = document.getElementById('birth_month').value, bd = document.getElementById('birth_day').value;
-        document.getElementById('doc_birthdate').innerText = (by && bm && bd) ? `${by}.${bm}.${bd}` : '-';
-
-        const p1 = document.getElementById('phone_prefix').value, p2 = document.getElementById('phone_mid').value, p3 = document.getElementById('phone_end').value;
-        document.getElementById('doc_phone').innerText = (p2 && p3) ? `${p1}-${p2}-${p3}` : '-';
-
-        const postcode = document.getElementById('postcode').value;
-        const mainAddr = document.getElementById('address_main').value;
-        const detailAddr = document.getElementById('address_detail').value;
-        
-        if (mainAddr) {
-            document.getElementById('doc_address').innerText = `(${postcode}) ${mainAddr} ${detailAddr}`.trim();
-        } else {
-            document.getElementById('doc_address').innerText = '-';
-        }
-
-        document.getElementById('doc_email').innerText = document.getElementById('user_email').value || '-';
-
-        const docPhoto = document.getElementById('doc_photo'), docPhotoPh = document.getElementById('doc_photo_ph');
-        if (uploadedPhotoData) { docPhoto.src = uploadedPhotoData; docPhoto.style.display = 'block'; docPhotoPh.style.display = 'none'; } 
-        else { docPhoto.style.display = 'none'; docPhotoPh.style.display = 'block'; }
-
-        // 수기 서명 이미지를 PDF 양식 하단에 넣기
-        const sigImgElem = document.getElementById('doc_signature_img');
-        if (hasSigned) {
-            sigImgElem.src = canvas.toDataURL('image/png');
-            sigImgElem.style.display = 'inline-block';
-        } else {
-            sigImgElem.style.display = 'none';
-        }
-
-        const t = new Date();
-        document.getElementById('doc_today_date').innerText = `${t.getFullYear()}년 ${(t.getMonth() + 1).toString().padStart(2, '0')}월 ${t.getDate().toString().padStart(2, '0')}일`;
-
-        const licTbody = document.getElementById('doc_lic_body'); licTbody.innerHTML = '';
-        let licCount = 0;
-        document.querySelectorAll('#teacherLicTbody tr').forEach(row => {
-            const grade = row.querySelector('.lic-grade').value, subject = row.querySelector('.lic-subject').value, org = row.querySelector('.lic-org').value, type = row.querySelector('.lic-type').value;
-            const ly = row.querySelector('.lic-year').value, lm = row.querySelector('.lic-month').value, ld = row.querySelector('.lic-day').value;
-            if (subject || org) {
-                licCount++;
-                licTbody.innerHTML += `<tr><td>${grade || '-'}</td><td>${subject || '-'}</td><td>${org || '-'}</td><td>${type || '-'}</td><td>${(ly && lm && ld) ? `${ly}.${lm}.${ld}` : '-'}</td></tr>`;
+    <!-- 자동 재생 보장 자바스크립트 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const video = document.getElementById('videoPlayer');
+            if (video) {
+                video.play().catch(error => {
+                    console.warn('자동 재생이 실행되지 않았습니다:', error);
+                });
             }
         });
-        if (licCount === 0) licTbody.innerHTML = `<tr><td colspan="5">-</td></tr>`;
-
-        const eduTbody = document.getElementById('doc_edu_body'); eduTbody.innerHTML = '';
-        let eduCount = 0;
-        document.querySelectorAll('#eduTbody tr').forEach(row => {
-            const sY = row.querySelector('.edu-start-year').value, sM = row.querySelector('.edu-start-month').value;
-            const eY = row.querySelector('.edu-end-year').value, eM = row.querySelector('.edu-end-month').value;
-            const school = row.querySelector('.edu-school').value, major = row.querySelector('.edu-major').value, note = row.querySelector('.edu-note').value;
-            if (school || major) {
-                eduCount++;
-                eduTbody.innerHTML += `<tr><td>${(sY && sM && eY && eM) ? `${sY}.${sM} ~ ${eY}.${eM}` : '-'}</td><td>${school || '-'}</td><td>${major || '-'}</td><td>${note || '-'}</td></tr>`;
-            }
-        });
-        if (eduCount === 0) eduTbody.innerHTML = `<tr><td>-</td><td>-</td><td>-</td><td>-</td></tr>`;
-
-        const expTbody = document.getElementById('doc_exp_body'); expTbody.innerHTML = '';
-        if (document.getElementById('noExpCheckbox').checked) {
-            expTbody.innerHTML = `<tr><td colspan="3">경력 없음 (신규)</td><td>-</td></tr>`;
-        } else {
-            let expCount = 0;
-            document.querySelectorAll('#expTbody tr').forEach(row => {
-                const sY = row.querySelector('.start-year').value, sM = row.querySelector('.start-month').value;
-                const eY = row.querySelector('.end-year').value, eM = row.querySelector('.end-month').value;
-                const pos = row.querySelector('.exp-pos').value, org = row.querySelector('.exp-org').value, months = row.querySelector('.exp-months').value;
-                if (sY || pos || org) {
-                    expCount++;
-                    expTbody.innerHTML += `<tr><td>${(sY && sM && eY && eM) ? `${sY}.${sM} ~ ${eY}.${eM}` : '-'}</td><td>${pos || '-'}</td><td>${org || '-'}</td><td>${months || '-'}</td></tr>`;
-                }
-            });
-            if (expCount === 0) expTbody.innerHTML = `<tr><td colspan="3">경력 없음 (신규)</td><td>-</td></tr>`;
-            else expTbody.innerHTML += `<tr><th colspan="3">총 교원 경력</th><td><b>${document.getElementById('total_exp').value || '0개월'}</b></td></tr>`;
-        }
-
-        const agreeCheck = document.querySelector('input[name="agree_check"]:checked');
-        if (agreeCheck && agreeCheck.value === '동의함') {
-            document.getElementById('doc_agree_check_yes').innerText = '☑';
-            document.getElementById('doc_agree_check_no').innerText = '☐';
-        } else {
-            document.getElementById('doc_agree_check_yes').innerText = '☐';
-            document.getElementById('doc_agree_check_no').innerText = '☑';
-        }
-
-        const agreePrivacy = document.querySelector('input[name="agree_privacy"]:checked');
-        if (agreePrivacy && agreePrivacy.value === '동의함') {
-            document.getElementById('doc_agree_privacy_yes').innerText = '☑';
-            document.getElementById('doc_agree_privacy_no').innerText = '☐';
-        } else {
-            document.getElementById('doc_agree_privacy_yes').innerText = '☐';
-            document.getElementById('doc_agree_privacy_no').innerText = '☑';
-        }
-
-        generateCoverLetterPages();
-    }
-
-    function generateCoverLetterPages() {
-        const applySubject = document.getElementById('apply_subject').value || '-';
-        const userName = document.getElementById('user_name').value || '-';
-
-        const items = [
-            { title: "1. 자신의 장·단점", text: document.getElementById('cover_1').value.trim() },
-            { title: "2. 학생 인성지도계획", text: document.getElementById('cover_2').value.trim() },
-            { title: "3. 교과학습 지도계획", text: document.getElementById('cover_3').value.trim() },
-            { title: "4. 본인의 교직관", text: document.getElementById('cover_4').value.trim() }
-        ];
-
-        const container = document.getElementById('cover-letter-pages-container');
-        container.innerHTML = '';
-
-        const pageDiv = document.createElement('div');
-        pageDiv.className = 'pdf-page';
-        
-        let htmlContent = `<div class="paper-title" style="margin-bottom: 8px; font-size: 16px;">자 기 소 개 서</div>`;
-        htmlContent += `<div style="text-align: right; margin-bottom: 10px; font-size: 10pt; font-weight: bold; color: #000;">지원과목 : ${applySubject} &nbsp;&nbsp;&nbsp; 성명 : ${userName}</div>`;
-        htmlContent += `<div class="pdf-cover-container">`;
-        
-        items.forEach(item => {
-            htmlContent += `<div class="pdf-cover-item">`;
-            htmlContent += `<div class="pdf-cover-title">${item.title}</div>`;
-            htmlContent += `<div class="pdf-cover-content">${item.text || '내용이 입력되지 않았습니다.'}</div>`;
-            htmlContent += `</div>`;
-        });
-        
-        htmlContent += `</div>`;
-        pageDiv.innerHTML = htmlContent;
-        container.appendChild(pageDiv);
-    }
-
-    async function downloadPDF() {
-        const form = document.getElementById('applyForm');
-        if (!form.reportValidity()) {
-            return; 
-        }
-
-        if (!uploadedPhotoData) { alert('사진을 첨부해 주세요.'); return; }
-        if (!hasSigned) { alert('지원자 서명 패드에 서명을 해주세요.'); return; }
-
-        populatePaperTemplate();
-        
-        const btn = document.querySelector('.btn-preview');
-        const originalText = btn.innerText;
-        btn.innerHTML = 'PDF 생성 중... 잠시만 기다려주세요';
-        btn.disabled = true;
-
-        try {
-            const { jsPDF } = window.jspdf;
-            const pdf = new jsPDF('p', 'mm', 'a4');
-            const pages = document.querySelectorAll('#pdf-render-area .pdf-page');
-
-            for (let i = 0; i < pages.length; i++) {
-                if (i > 0) pdf.addPage();
-                const canvasRender = await html2canvas(pages[i], { scale: 2, useCORS: true });
-                const imgData = canvasRender.toDataURL('image/jpeg', 1.0);
-                pdf.addImage(imgData, 'JPEG', 0, 0, 210, 297);
-            }
-            
-            // 지원과목 및 성명을 반영한 파일명 설정
-            const applySubject = document.getElementById('apply_subject').value.trim() || '과목';
-            const userName = document.getElementById('user_name').value.trim() || '성명';
-
-            pdf.save(`능주고등학교 응시원서 및 자기소개서_${applySubject}_${userName}.pdf`);
-            alert('PDF가 저장되었습니다. njhs1139@korea.kr로 이 파일을 첨부하여 보내주세요.');
-        } catch (error) {
-            console.error('오류 발생:', error);
-            alert('PDF 생성 중 오류가 발생했습니다.');
-        } finally {
-            btn.innerText = originalText;
-            btn.disabled = false;
-        }
-    }
-
-    window.onload = function() {
-        initBirthdateSelects(); 
-        initTeacherLicSelects(); 
-        initSignatureCanvas();
-        
-        addEducationRow("○○대학교", true);  
-        addEducationRow("○○대학원", false); 
-
-        addExperienceRow(true);
-    };
-</script>
-
+    </script>
 </body>
 </html>
